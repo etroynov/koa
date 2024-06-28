@@ -1,13 +1,13 @@
-'use strict'
+import request from 'supertest'
+import assert from 'node:assert'
+import Koa from '../..'
 
-const request = require('supertest')
-const assert = require('assert')
-const Koa = require('../..')
+import { describe, it } from '@jest/globals'
 
 describe('app.use(fn)', () => {
   it('should compose middleware', async () => {
     const app = new Koa()
-    const calls = []
+    const calls: number[] = []
 
     app.use((ctx, next) => {
       calls.push(1)
@@ -41,7 +41,7 @@ describe('app.use(fn)', () => {
 
   it('should compose mixed middleware', async () => {
     const app = new Koa()
-    const calls = []
+    const calls: number[] = []
 
     app.use((ctx, next) => {
       calls.push(1)
@@ -86,7 +86,7 @@ describe('app.use(fn)', () => {
   it('should throw error for non-function', () => {
     const app = new Koa();
 
-    [null, undefined, 0, false, 'not a function'].forEach(v => {
+    [null, undefined, 0, false, 'not a function'].forEach((v: any) => {
       assert.throws(() => app.use(v), /middleware must be a function!/)
     })
   })

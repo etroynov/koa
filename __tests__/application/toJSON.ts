@@ -1,7 +1,7 @@
-'use strict'
+import assert from 'node:assert'
+import Koa from '../..'
 
-const assert = require('assert')
-const Koa = require('../..')
+import { describe, it } from '@jest/globals'
 
 describe('app.toJSON()', () => {
   it('should work', () => {
