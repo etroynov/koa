@@ -1,15 +1,9 @@
-'use strict'
-
-/**
- * Module dependencies.
- */
-
-const util = require('util')
-const createError = require('http-errors')
-const httpAssert = require('http-assert')
-const delegate = require('delegates')
-const statuses = require('statuses')
-const Cookies = require('cookies')
+import util from 'node:util'
+import createError from 'http-errors'
+import httpAssert from 'http-assert'
+import delegate from 'delegates'
+import statuses from 'statuses'
+import Cookies from 'cookies'
 
 const COOKIES = Symbol('context#cookies')
 
@@ -17,7 +11,7 @@ const COOKIES = Symbol('context#cookies')
  * Context prototype.
  */
 
-const proto = module.exports = {
+const context = {
 
   /**
    * util.inspect() implementation, which
@@ -28,7 +22,7 @@ const proto = module.exports = {
    */
 
   inspect () {
-    if (this === proto) return this
+    if (this === context) return this
     return this.toJSON()
   },
 
@@ -180,22 +174,10 @@ const proto = module.exports = {
 }
 
 /**
- * Custom inspection implementation for newer Node.js versions.
- *
- * @return {Object}
- * @api public
- */
-
-/* istanbul ignore else */
-if (util.inspect.custom) {
-  module.exports[util.inspect.custom] = module.exports.inspect
-}
-
-/**
  * Response delegation.
  */
 
-delegate(proto, 'response')
+delegate(context, 'response')
   .method('attachment')
   .method('redirect')
   .method('remove')
@@ -218,7 +200,7 @@ delegate(proto, 'response')
  * Request delegation.
  */
 
-delegate(proto, 'request')
+delegate(context, 'request')
   .method('acceptsLanguages')
   .method('acceptsEncodings')
   .method('acceptsCharsets')
@@ -248,3 +230,6 @@ delegate(proto, 'request')
   .getter('fresh')
   .getter('ips')
   .getter('ip')
+
+export type KoaContext = typeof context
+export default context

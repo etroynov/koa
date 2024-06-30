@@ -1,75 +1,83 @@
-'use strict'
+export { HttpError } from 'http-errors'
 
-/**
- * Module dependencies.
- */
+import util from 'node:util'
+import http from 'node:http'
+import assert from 'node:assert'
+import Emitter from 'node:events'
+import Stream from 'node:stream'
+import { AsyncLocalStorage } from 'node:async_hooks'
 
-const debug = require('debug')('koa:application')
-const assert = require('assert')
-const onFinished = require('on-finished')
-const response = require('./response')
-const compose = require('koa-compose')
-const context = require('./context')
-const request = require('./request')
-const statuses = require('statuses')
-const Emitter = require('events')
-const util = require('util')
-const Stream = require('stream')
-const http = require('http')
-const only = require('only')
-const { HttpError } = require('http-errors')
+import debug from 'debug';
+import onFinished from 'on-finished'
+import compose from 'koa-compose'
+import statuses from 'statuses'
 
-/** @typedef {typeof import ('./context') & {
- *  app: Application
- *  req: import('http').IncomingMessage
- *  res: import('http').ServerResponse
- *  request: KoaRequest
- *  response: KoaResponse
- *  state: any
- *  originalUrl: string
- * }} Context */
+import response, { type KoaResponse } from './response'
+import request, { type KoaRequest } from './request'
+import context, { type KoaContext } from './context'
 
-/** @typedef {typeof import('./request')} KoaRequest */
+import { only } from './utils'
 
-/** @typedef {typeof import('./response')} KoaResponse */
+const httpDebug = debug('koa:application')
 
 /**
  * Expose `Application` class.
  * Inherits from `Emitter.prototype`.
  */
 
-module.exports = class Application extends Emitter {
+export type KoaOptions = {
+  /** Environment */
+  env: string;
+  /** Signed cookie keys */
+  keys: string[];
+  /** Trust proxy headers */
+  proxy: boolean;
+  /** Subdomain offset */
+  subdomainOffset: number;
+  /** Proxy IP header, defaults to X-Forwarded-For */
+  proxyIpHeader: string;
+  /** Max IPs read from proxy IP header, default to 0 (means infinity) */
+  maxIpsCount: number;
+  /** No data */
+  asyncLocalStorage: boolean;
+
+  /** Function to handle middleware composition */
+  compose(args: any): void;
+}
+
+export default class Application extends Emitter {
   /**
    * Initialize a new `Application`.
    *
    * @api public
    */
 
-  /**
-    *
-    * @param {object} [options] Application options
-    * @param {string} [options.env='development'] Environment
-    * @param {string[]} [options.keys] Signed cookie keys
-    * @param {boolean} [options.proxy] Trust proxy headers
-    * @param {number} [options.subdomainOffset] Subdomain offset
-    * @param {string} [options.proxyIpHeader] Proxy IP header, defaults to X-Forwarded-For
-    * @param {number} [options.maxIpsCount] Max IPs read from proxy IP header, default to 0 (means infinity)
-    * @param {function} [options.compose] Function to handle middleware composition
-    * @param {boolean} [options.asyncLocalStorage] Max IPs read from proxy IP header, default to 0 (means infinity)
-    *
-    */
+  public proxy: boolean;
+  public subdomainOffset: number;
+  public proxyIpHeader: string;
+  public maxIpsCount: number;
+  public env: string;
+  public keys: string[];
+  public silent: boolean;
+  public ctxStorage: AsyncLocalStorage<unknown>;
 
-  constructor (options) {
+  public compose: any;
+  public context: KoaContext;
+  public request: KoaRequest;
+  public response: KoaResponse;
+
+  public middleware = [];
+
+  constructor (options?: KoaOptions) {
     super()
-    options = options || {}
-    this.proxy = options.proxy || false
-    this.subdomainOffset = options.subdomainOffset || 2
-    this.proxyIpHeader = options.proxyIpHeader || 'X-Forwarded-For'
-    this.maxIpsCount = options.maxIpsCount || 0
-    this.env = options.env || process.env.NODE_ENV || 'development'
-    this.compose = options.compose || compose
-    if (options.keys) this.keys = options.keys
-    this.middleware = []
+
+    this.proxy = options?.proxy || false
+    this.subdomainOffset = options?.subdomainOffset || 2
+    this.proxyIpHeader = options?.proxyIpHeader || 'X-Forwarded-For'
+    this.maxIpsCount = options?.maxIpsCount || 0
+    this.env = options?.env || process.env.NODE_ENV || 'development'
+    this.compose = options?.compose || compose
+    if (options?.keys) this.keys = options.keys
     this.context = Object.create(context)
     this.request = Object.create(request)
     this.response = Object.create(response)
@@ -78,8 +86,7 @@ module.exports = class Application extends Emitter {
     if (util.inspect.custom) {
       this[util.inspect.custom] = this.inspect
     }
-    if (options.asyncLocalStorage) {
-      const { AsyncLocalStorage } = require('async_hooks')
+    if (options?.asyncLocalStorage) {
       assert(AsyncLocalStorage, 'Requires node 12.17.0 or higher to enable asyncLocalStorage')
       this.ctxStorage = new AsyncLocalStorage()
     }
@@ -96,7 +103,7 @@ module.exports = class Application extends Emitter {
    */
 
   listen (...args) {
-    debug('listen')
+    httpDebug('listen')
     const server = http.createServer(this.callback())
     return server.listen(...args)
   }
@@ -140,7 +147,7 @@ module.exports = class Application extends Emitter {
 
   use (fn) {
     if (typeof fn !== 'function') throw new TypeError('middleware must be a function!')
-    debug('use %s', fn._name || fn.name || '-')
+    httpDebug('use %s', fn._name || fn.name || '-')
     this.middleware.push(fn)
     return this
   }
@@ -250,6 +257,8 @@ module.exports = class Application extends Emitter {
   }
 }
 
+export type KoaApplication = typeof Application
+
 /**
  * Response helper.
  */
@@ -311,10 +320,3 @@ function respond (ctx) {
   }
   res.end(body)
 }
-
-/**
- * Make HttpError available to consumers of the library so that consumers don't
- * have a direct dependency upon `http-errors`
- */
-
-module.exports.HttpError = HttpError

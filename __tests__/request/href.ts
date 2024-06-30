@@ -2,7 +2,7 @@ import Stream from 'node:stream'
 import assert from 'node:assert'
 import http from 'node:http'
 import createContext from '../../test-helpers/context'
-import Koa from '../..'
+import Koa from '../../src/application'
 
 import { describe, it } from '@jest/globals'
 

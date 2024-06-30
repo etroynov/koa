@@ -1,6 +1,6 @@
 import util from 'node:util'
 import assert from 'node:assert'
-import Koa from '../..'
+import Koa from '../../src/application'
 
 import { describe, it } from '@jest/globals'
 

@@ -1,20 +1,14 @@
-'use strict'
+import net from 'node:net'
+import qs from 'node:querystring'
+import { URL, format } from 'node:url'
 
-/**
- * Module dependencies.
- */
+import accepts from 'accepts'
+import contentType from 'content-type'
+import parse from 'parseurl'
+import fresh from 'fresh'
+import typeis from 'type-is'
 
-const URL = require('url').URL
-const net = require('net')
-const accepts = require('accepts')
-const contentType = require('content-type')
-const stringify = require('url').format
-const parse = require('parseurl')
-const qs = require('querystring')
-const typeis = require('type-is')
-const fresh = require('fresh')
-const only = require('only')
-const util = require('util')
+import { only } from './utils'
 
 const IP = Symbol('context#ip')
 
@@ -22,7 +16,7 @@ const IP = Symbol('context#ip')
  * Prototype.
  */
 
-module.exports = {
+const request = {
 
   /**
    * Return request header.
@@ -158,7 +152,7 @@ module.exports = {
     url.pathname = path
     url.path = null
 
-    this.url = stringify(url)
+    this.url = format(url)
   },
 
   /**
@@ -208,10 +202,11 @@ module.exports = {
     const url = parse(this.req)
     if (url.search === `?${str}`) return
 
+    // @ts-ignore
     url.search = str
     url.path = null
 
-    this.url = stringify(url)
+    this.url = format(url)
   },
 
   /**
@@ -712,14 +707,5 @@ module.exports = {
   }
 }
 
-/**
- * Custom inspection implementation for newer Node.js versions.
- *
- * @return {Object}
- * @api public
- */
-
-/* istanbul ignore else */
-if (util.inspect.custom) {
-  module.exports[util.inspect.custom] = module.exports.inspect
-}
+export type KoaRequest = typeof request
+export default request

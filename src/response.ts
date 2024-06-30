@@ -1,29 +1,24 @@
-'use strict'
+import Stream from 'node:stream'
+import assert from 'node:assert'
+import { extname } from 'node:path'
 
-/**
- * Module dependencies.
- */
+import vary from 'vary'
+import typeis from 'type-is'
+import onFinished from 'on-finished'
+import statuses from 'statuses'
+import escape from 'escape-html'
+import getType from 'cache-content-type'
+import encodeUrl from 'encodeurl'
+import destroy from 'destroy'
+import contentDisposition from 'content-disposition'
 
-const contentDisposition = require('content-disposition')
-const getType = require('cache-content-type')
-const onFinish = require('on-finished')
-const escape = require('escape-html')
-const typeis = require('type-is').is
-const statuses = require('statuses')
-const destroy = require('destroy')
-const assert = require('assert')
-const extname = require('path').extname
-const vary = require('vary')
-const only = require('only')
-const util = require('util')
-const encodeUrl = require('encodeurl')
-const Stream = require('stream')
+import { only } from './utils'
 
 /**
  * Prototype.
  */
 
-module.exports = {
+const response = {
 
   /**
    * Return the request socket.
@@ -172,7 +167,7 @@ module.exports = {
 
     // stream
     if (val instanceof Stream) {
-      onFinish(this.res, destroy.bind(null, val))
+      onFinished(this.res, destroy.bind(null, val))
       if (original !== val) {
         val.once('error', err => this.ctx.onerror(err))
         // overwriting
@@ -408,7 +403,7 @@ module.exports = {
    */
 
   is (type, ...types) {
-    return typeis(this.type, type, ...types)
+    return typeis.is(this.type, type, ...types)
   },
 
   /**
@@ -587,14 +582,5 @@ module.exports = {
   }
 }
 
-/**
- * Custom inspection implementation for node 6+.
- *
- * @return {Object}
- * @api public
- */
-
-/* istanbul ignore else */
-if (util.inspect.custom) {
-  module.exports[util.inspect.custom] = module.exports.inspect
-}
+export type KoaResponse = typeof response
+export default response

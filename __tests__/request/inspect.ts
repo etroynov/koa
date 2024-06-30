@@ -4,12 +4,10 @@ import createContext from '../../test-helpers/context'
 
 import { describe, it } from '@jest/globals'
 
-const { request } = createContext
-
 describe('req.inspect()', () => {
   describe('with no request.req present', () => {
     it('should return null', () => {
-      const req = request()
+      const req = createContext.request()
       req.method = 'GET'
       delete req.req
       assert(undefined === req.inspect())
@@ -18,7 +16,7 @@ describe('req.inspect()', () => {
   })
 
   it('should return a json representation', () => {
-    const req = request()
+    const req = createContext.request()
     req.method = 'GET'
     req.url = 'example.com'
     req.header.host = 'example.com'

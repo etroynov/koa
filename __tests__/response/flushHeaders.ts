@@ -1,7 +1,7 @@
 import request from 'supertest'
 import assert from 'node:assert'
 import http from 'node:http'
-import Koa from '../..'
+import Koa from '../../src/application'
 
 import { describe, it } from '@jest/globals'
 

@@ -1,6 +1,6 @@
 import request from 'supertest'
 import assert from 'node:assert'
-import Koa from '../..'
+import Koa from '../../src/application'
 import createContext from '../../test-helpers/context'
 
 import { describe, it } from '@jest/globals'

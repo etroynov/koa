@@ -1,7 +1,7 @@
 import assert from 'node:assert'
 import util from 'node:util'
 import createContext from '../../test-helpers/context'
-import context from '../../lib/context'
+import context from '../../src/context'
 
 import { describe, it } from '@jest/globals'
 

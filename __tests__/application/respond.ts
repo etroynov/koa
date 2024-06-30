@@ -2,7 +2,7 @@ import statuses from 'statuses'
 import request from 'supertest'
 import assert from 'node:assert'
 import fs from 'node:fs'
-import Koa from '../..'
+import Koa from '../../src/application'
 
 import { describe, it } from '@jest/globals'
 
@@ -272,12 +272,12 @@ describe('app.respond', () => {
     it('should send the right body', () => {
       const app = new Koa()
 
-      app.use((ctx, next) => {
+      app.use(ctx => {
         const res = ctx.res
         ctx.status = 200
         res.setHeader('Content-Type', 'text/html')
         res.write('Hello')
-        return new Promise(resolve => {
+        return new Promise<void>(resolve => {
           setTimeout(() => {
             res.end('Goodbye')
             resolve()
@@ -386,6 +386,7 @@ describe('app.respond', () => {
           .expect(700)
           .expect('custom status')
 
+        // @ts-ignore
         assert.strictEqual(res.res.statusMessage, 'custom status')
       })
     })
@@ -406,6 +407,7 @@ describe('app.respond', () => {
           .expect(200)
           .expect('ok')
 
+        // @ts-ignore
         assert.strictEqual(res.res.statusMessage, 'ok')
       })
     })
@@ -764,8 +766,8 @@ describe('app.respond', () => {
       it('should expose the message', () => {
         const app = new Koa()
 
-        app.use(ctx => {
-          const err = new Error('sorry!')
+        app.use(() => {
+          const err: any = new Error('sorry!')
           err.status = 403
           err.expose = true
           throw err
@@ -781,8 +783,8 @@ describe('app.respond', () => {
       it('should respond with .status', () => {
         const app = new Koa()
 
-        app.use(ctx => {
-          const err = new Error('s3 explodes')
+        app.use(() => {
+          const err: any = new Error('s3 explodes')
           err.status = 403
           throw err
         })

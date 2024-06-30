@@ -1,22 +1,23 @@
 import request from 'supertest'
 import assert from 'node:assert'
-import Koa from '../..'
+import Koa from '../../src/application'
 
 import { describe, it } from '@jest/globals'
+import { KoaContext } from '@/context'
 
 describe('app.compose', () => {
   it('should work with default compose ', async () => {
     const app = new Koa()
-    const calls = []
+    const calls: number[] = []
 
-    app.use((ctx, next) => {
+    app.use((_ctx: KoaContext, next) => {
       calls.push(1)
       return next().then(() => {
         calls.push(4)
       })
     })
 
-    app.use((ctx, next) => {
+    app.use((_ctx: KoaContext, next) => {
       calls.push(2)
       return next().then(() => {
         calls.push(3)
@@ -37,7 +38,7 @@ describe('app.compose', () => {
     let count = 0
     const app = new Koa({
       compose (fns) {
-        return async (ctx) => {
+        return async (ctx: KoaContext) => {
           const dispatch = async () => {
             count++
             const fn = fns.shift()
@@ -48,12 +49,12 @@ describe('app.compose', () => {
       }
     })
 
-    app.use((ctx, next) => {
+    app.use((_ctx: KoaContext, next) => {
       calls.push(1)
       next()
       calls.push(4)
     })
-    app.use((ctx, next) => {
+    app.use((_ctx: KoaContext, next) => {
       calls.push(2)
       next()
       calls.push(3)

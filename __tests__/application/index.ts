@@ -1,6 +1,7 @@
 import request from 'supertest'
 import assert from 'node:assert'
-import Koa from '../..'
+import Koa from '../../src/application'
+import CreateError from 'http-errors'
 
 import { describe, it } from '@jest/globals'
 
@@ -9,7 +10,7 @@ describe('app', () => {
   (/^v18\./.test(process.version) ? it.skip : it)('should handle socket errors', done => {
     const app = new Koa()
 
-    app.use((ctx, next) => {
+    app.use(ctx => {
       // triggers ctx.socket.writable == false
       ctx.socket.emit('error', new Error('boom'))
     })
@@ -27,7 +28,7 @@ describe('app', () => {
   it('should not .writeHead when !socket.writable', done => {
     const app = new Koa()
 
-    app.use((ctx, next) => {
+    app.use(ctx => {
       // set .writable to false
       ctx.socket.writable = false
       ctx.status = 204
@@ -79,16 +80,14 @@ describe('app', () => {
   })
 
   it('should set compose from the constructor', () => {
-    const compose = () => (ctx) => {}
+    const compose = () => () => {}
     const app = new Koa({ compose })
     assert.strictEqual(app.compose, compose)
   })
 
   it('should have a static property exporting `HttpError` from http-errors library', () => {
-    const CreateError = require('http-errors')
-
     assert.notEqual(Koa.HttpError, undefined)
     assert.deepStrictEqual(Koa.HttpError, CreateError.HttpError)
-    assert.throws(() => { throw new CreateError(500, 'test error') }, Koa.HttpError)
+    assert.throws(() => { throw CreateError(500, 'test error') }, Koa.HttpError)
   })
 })

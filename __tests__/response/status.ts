@@ -1,7 +1,7 @@
 import assert from 'node:assert'
 import request from 'supertest'
 import statuses from 'statuses'
-import Koa from '../..'
+import Koa from '../../src/application'
 import createContext from '../../test-helpers/context'
 
 import { describe, it, beforeEach } from '@jest/globals'
@@ -47,7 +47,7 @@ describe('res.status=', () => {
         const res = createContext.response({
           httpVersionMajor: 2,
           httpVersion: '2.0'
-        })
+        } as any)
         res.status = 200
         assert(!res.res.statusMessage)
       })

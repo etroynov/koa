@@ -1,6 +1,6 @@
 import request from 'supertest'
 import assert from 'node:assert'
-import Koa from '../..'
+import Koa from '../../src/application'
 
 import { describe, it } from '@jest/globals'
 
@@ -18,13 +18,13 @@ describe('app.currentContext', () => {
 
     app.use(async ctx => {
       assert(ctx === app.currentContext)
-      await new Promise(resolve => {
+      await new Promise<void>(resolve => {
         setTimeout(() => {
           assert(ctx === app.currentContext)
           resolve()
         }, 1)
       })
-      await new Promise(resolve => {
+      await new Promise<void>(resolve => {
         assert(ctx === app.currentContext)
         setImmediate(() => {
           assert(ctx === app.currentContext)
@@ -68,7 +68,7 @@ describe('app.currentContext', () => {
       throw new Error('error message')
     })
 
-    const handleError = new Promise((resolve, reject) => {
+    const handleError = new Promise<void>((resolve, reject) => {
       app.on('error', (err, ctx) => {
         try {
           assert.strictEqual(err.message, 'error message')
@@ -91,8 +91,8 @@ describe('app.currentContext', () => {
       throw new Error('error message')
     })
 
-    const handleError = new Promise((resolve, reject) => {
-      app.on('error', (err, ctx) => {
+    const handleError = new Promise<void>((resolve, reject) => {
+      app.on('error', err => {
         try {
           assert.strictEqual(err.message, 'error message')
           assert.strictEqual(app.currentContext, undefined)

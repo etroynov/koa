@@ -1,6 +1,6 @@
 import assert from 'node:assert'
 import net from 'node:net'
-import Koa from '../..'
+import Koa from '../../src/application'
 
 import { describe, it } from '@jest/globals'
 

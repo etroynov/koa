@@ -1,7 +1,7 @@
 import assert from 'node:assert'
-import Koa from '../..'
+import Koa from '../../src/application'
 
-import { describe, it } from '@jest/globals'
+import { describe, expect, it, jest } from '@jest/globals'
 
 describe('app.onerror(err)', () => {
   it('should throw an error if a non-error is given', () => {
@@ -26,7 +26,7 @@ describe('app.onerror(err)', () => {
 
   it('should do nothing if status is 404', () => {
     const app = new Koa()
-    const err = new Error()
+    const err: any = new Error()
 
     err.status = 404
 

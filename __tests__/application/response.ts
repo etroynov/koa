@@ -1,6 +1,6 @@
 import request from 'supertest'
 import assert from 'node:assert'
-import Koa from '../..'
+import Koa from '../../src/application'
 
 import { describe, it } from '@jest/globals'
 
@@ -15,7 +15,7 @@ describe('app.response', () => {
   const app7 = new Koa()
 
   it('should merge properties', () => {
-    app1.use((ctx, next) => {
+    app1.use(ctx => {
       assert.strictEqual(ctx.response.msg, 'hello')
       ctx.status = 204
     })
@@ -26,7 +26,7 @@ describe('app.response', () => {
   })
 
   it('should not affect the original prototype', () => {
-    app2.use((ctx, next) => {
+    app2.use(ctx => {
       assert.strictEqual(ctx.response.msg, undefined)
       ctx.status = 204
     })
@@ -37,7 +37,7 @@ describe('app.response', () => {
   })
 
   it('should not include status message in body for http2', async () => {
-    app3.use((ctx, next) => {
+    app3.use(ctx => {
       ctx.req.httpVersionMajor = 2
       ctx.status = 404
     })
@@ -48,7 +48,7 @@ describe('app.response', () => {
   })
 
   it('should set ._explicitNullBody correctly', async () => {
-    app4.use((ctx, next) => {
+    app4.use(ctx => {
       ctx.body = null
       assert.strictEqual(ctx.response._explicitNullBody, true)
     })
@@ -59,7 +59,7 @@ describe('app.response', () => {
   })
 
   it('should not set ._explicitNullBody incorrectly', async () => {
-    app5.use((ctx, next) => {
+    app5.use(ctx => {
       ctx.body = undefined
       assert.strictEqual(ctx.response._explicitNullBody, undefined)
       ctx.body = ''
@@ -74,7 +74,7 @@ describe('app.response', () => {
   })
 
   it('should add Content-Length when Transfer-Encoding is not defined', () => {
-    app6.use((ctx, next) => {
+    app6.use(ctx => {
       ctx.body = 'hello world'
     })
 
@@ -85,7 +85,7 @@ describe('app.response', () => {
   })
 
   it('should not add Content-Length when Transfer-Encoding is defined', () => {
-    app7.use((ctx, next) => {
+    app7.use(ctx => {
       ctx.set('Transfer-Encoding', 'chunked')
       ctx.body = 'hello world'
       assert.strictEqual(ctx.response.get('Content-Length'), undefined)

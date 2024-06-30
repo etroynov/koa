@@ -1,6 +1,6 @@
 import request from 'supertest'
 import assert from 'node:assert'
-import Koa from '../..'
+import Koa from '../../src/application'
 
 import { describe, it } from '@jest/globals'
 
@@ -10,7 +10,7 @@ describe('app.context', () => {
   const app2 = new Koa()
 
   it('should merge properties', () => {
-    app1.use((ctx, next) => {
+    app1.use(ctx => {
       assert.strictEqual(ctx.msg, 'hello')
       ctx.status = 204
     })
@@ -21,7 +21,7 @@ describe('app.context', () => {
   })
 
   it('should not affect the original prototype', () => {
-    app2.use((ctx, next) => {
+    app2.use(ctx => {
       assert.strictEqual(ctx.msg, undefined)
       ctx.status = 204
     })

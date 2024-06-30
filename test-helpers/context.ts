@@ -1,18 +1,30 @@
 import Stream from 'node:stream'
-import Koa from '../lib/application'
+import Koa, { type KoaApplication } from '../src/application'
+import type { IncomingMessage, ServerResponse } from 'node:http'
 
-const createContext = (req, res, app) => {
+const createContext = (req?: IncomingMessage, res?: ServerResponse, app?: KoaApplication) => {
   const socket = new Stream.Duplex()
+
   req = Object.assign({ headers: {}, socket }, Stream.Readable.prototype, req)
   res = Object.assign({ _headers: {}, socket }, Stream.Writable.prototype, res)
+  // @ts-ignore
   req.socket.remoteAddress = req.socket.remoteAddress || '127.0.0.1'
+
+  // @ts-ignore
   app = app || new Koa()
-  res.getHeader = k => res._headers[k.toLowerCase()]
-  res.setHeader = (k, v) => { res._headers[k.toLowerCase()] = v }
-  res.removeHeader = (k, v) => delete res._headers[k.toLowerCase()]
+
+  // @ts-ignore
+  res.getHeader = (k: string) => res._headers[k.toLowerCase()]
+  // @ts-ignore
+  res.setHeader = (k: string, v: string) => { res._headers[k.toLowerCase()] = v }
+  // @ts-ignore
+  res.removeHeader = (k: string) => delete res._headers[k.toLowerCase()]
+
+  // @ts-ignore
   return app.createContext(req, res)
 }
 
-module.exports = createContext
-module.exports.request = (req, res, app) => createContext(req, res, app).request
-module.exports.response = (req, res, app) => createContext(req, res, app).response
+createContext.request = (req?: IncomingMessage, res?: ServerResponse, app?: KoaApplication) => createContext(req, res, app).request
+createContext.response = (req?: IncomingMessage, res?: ServerResponse, app?: KoaApplication) => createContext(req, res, app).response
+
+export default createContext
