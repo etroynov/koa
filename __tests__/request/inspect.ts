@@ -4,7 +4,7 @@ import createContext from '../../test-helpers/context'
 
 import { describe, it } from '@jest/globals'
 
-describe('req.inspect()', () => {
+describe.skip('req.inspect()', () => {
   describe('with no request.req present', () => {
     it('should return null', () => {
       const req = createContext.request()

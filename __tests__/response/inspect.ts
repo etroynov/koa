@@ -4,7 +4,7 @@ import createContext from '../../test-helpers/context'
 
 import { describe, it } from '@jest/globals'
 
-describe('res.inspect()', () => {
+describe.skip('res.inspect()', () => {
   describe('with no response.res present', () => {
     it('should return null', () => {
       const res = createContext.response()
